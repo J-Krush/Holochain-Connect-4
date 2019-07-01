@@ -5,7 +5,7 @@ use hdk::holochain_json_api::{
 use crate::game_move::Move;
 use crate::game::Game;
 use super::MoveType;
-
+use hdk::AGENT_ADDRESS;
 
 /**
  *
@@ -23,11 +23,30 @@ const COLUMNS: usize = 7;
 const MAX_COLUMN_INDEX: usize = 6;
 const MAX_ROW_INDEX: usize = 5;
 
+#[derive(Clone, Debug, Serialize, Deserialize, DefaultJson)]
+pub struct PlayerState {
+    // pub pieces: Vec<Piece>,
+    pub resigned: bool,
+    pub winner: bool,
+}
+
+impl PlayerState {
+    pub fn initial() -> Self {
+        PlayerState {
+            // pieces: Vec::new(),
+            resigned: false,
+            winner: false,
+        }
+    }
+}
+
 
 #[derive(Clone, Debug, Serialize, Deserialize, DefaultJson)]
 pub struct GameState {
     pub moves: Vec<Move>,
     pub board: [[i32; ROWS]; COLUMNS],
+    pub player_1: PlayerState,
+    pub player_2: PlayerState,
 }
 
 impl GameState {
@@ -53,13 +72,50 @@ impl GameState {
         Self{
             moves: Vec::new(),
             board: [[0; 6]; 7],
+            player_1: PlayerState::initial(),
+            player_2: PlayerState::initial(),
         }
 
     }
 
     pub fn render(&self) -> String {
-        // <<DEVCAMP>> return a pretty formatting string representation
-        "".to_string()
+        let mut disp = "\n".to_string();
+
+        if let Some(last_move) = self.moves.last() {
+            if last_move.author.to_string() == AGENT_ADDRESS.to_string() {
+                disp.push_str("It is your opponents turn \n");
+            } else {
+                disp.push_str("It is your turn \n");
+            }
+        } else {
+            disp.push_str("Non-creator must make the first move \n");
+        }
+        // disp.push('\n');
+        // disp.push_str("  x  0 1 2\ny\n");
+        // let board = board_sparse_to_dense(self);
+        // for y in 0..BOARD_SIZE {
+        //     disp.push_str(&format!("{}   |", y));
+        //     for x in 0..BOARD_SIZE {
+        //         let c = match board[x][y] {
+        //             1 => PLAYER_1_MARK,
+        //             2 => PLAYER_2_MARK,
+        //             _ => EMPTY_SPACE,
+        //         };
+        //         disp.push_str(&format!("{}|", c));
+        //     }
+        //     disp.push('\n');
+        // }
+
+        if self.player_1.resigned {
+            disp.push_str(&format!("Game over: Player 1 has resigned!\n"));
+        } else if self.player_2.resigned {
+            disp.push_str(&format!("Game over: Player 2 has resigned!\n"));
+        } else if self.player_1.winner {
+            disp.push_str(&format!("Game over: Player 1 is the winner!\n"));
+        } else if self.player_2.winner {
+            disp.push_str(&format!("Game over: Player 2 is the winner!\n"));
+        }
+        disp
     }
 
     pub fn evolve(&self, game: Game, next_move: &Move) -> GameState {
@@ -78,9 +134,24 @@ impl GameState {
             }
         }
 
+        // check if this resulted in a player victory
+        let (win, player) = self.check_for_win(&board);
+
+        let mut player_1_win = false;
+        let mut player_2_win = false;
+        if win && player == 1 { player_1_win = true} else if win && player == 2 { player_2_win = true};
+
         GameState{
             moves,
             board,
+            player_1: PlayerState {
+                resigned: false,
+                winner: player_1_win,
+            },
+            player_2: PlayerState {
+                resigned: false,
+                winner: player_2_win,
+            },
         }
     }
 
@@ -94,6 +165,99 @@ impl GameState {
         }
 
         return board;
+    }
+
+    pub fn check_for_win(&self, board: &[[i32; 6]; 7]) -> (bool, i32) {
+
+        // let mut win = false;
+
+        let (win, player) = self.check_for_column_win(&board);
+        if win { return (true, player); }
+        let (win, player) = self.check_for_row_win(&board);
+        if win { return (true, player); }
+        let (win, player) = self.check_for_diagonal_win(&board);
+        if win { return (true, player); }
+
+        return (false, 0);
+    }
+
+    pub fn check_for_column_win(&self, board: &[[i32; 6]; 7]) -> (bool, i32) {
+        for col in 0..board.len() {
+            let mut count = 0;
+            let mut player = 0;
+            for row in 0..board[col].len() {
+                // x = the value of the piece
+                let x = board[col][row];
+                if x != 0 {
+                    if player == 0 || x == player {
+                        player = x;
+                        count = count + 1;
+                        if count == 4 {
+                            return (true, player);
+                        }
+                    } else {
+                        // Restart the counter
+                        player = x;
+                        count = 1;
+                    }
+                }
+            }
+        }
+        return (false, 0);
+    }
+
+    pub fn check_for_row_win(&self, board: &[[i32; 6]; 7]) -> (bool, i32) {
+        for row in 0..board[0].len() {
+            let mut count = 0;
+            let mut player = 0;
+            for col in 0..board.len() {
+                let x = board[col][row];
+                if x != 0 {
+                    if player == 0 || x == player {
+                        player = x;
+                        count = count + 1;
+                        if count == 4 {
+                            return (true, player);
+                        }
+                    } else {
+                        // Restart the counter
+                        player = x;
+                        count = 1;
+                    }
+                } else {
+                    count = 0;
+                    player = 0;
+                }
+            }
+        }
+        return (false, 0);
+    }
+
+    pub fn check_for_diagonal_win(&self, board: &[[i32; 6]; 7]) -> (bool, i32) {
+        // Up and to the right diagonal
+        for row in 0..=2 {
+            for col in 0..=3 {
+                if board[col][row] != 0 &&
+                board[col][row] == board[col+1][row+1] &&
+                board[col][row] == board[col+2][row+2] &&
+                board[col][row] == board[col+3][row+3] {
+                    return (true, board[col][row]);
+                }
+            }
+        }
+
+        // Down and to the right diagonal
+        for row in 3..=5 {
+            for col in 0..=3 {
+                if board[col][row] != 0 &&
+                board[col][row] == board[col+1][row-1] &&
+                board[col][row] == board[col+2][row-2] &&
+                board[col][row] == board[col+3][row-3] {
+                    return (true, board[col][row]);
+                }
+            }
+        }
+        return (false, 0);
     }
 
 }

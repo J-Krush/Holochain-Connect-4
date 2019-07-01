@@ -21,7 +21,6 @@ use super::moves::MoveType;
  *
  */
 
-
 impl Move {
     pub fn is_valid(&self, game: Game, game_state: GameState) -> Result<(), String> {
         is_players_turn(self.author.clone(), &game, &game_state)?;

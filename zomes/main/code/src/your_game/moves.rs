@@ -18,7 +18,6 @@ pub enum MoveType {
 
 impl MoveType {
 	pub fn describe() -> Vec<MoveType> {
-		// <<DEVCAMP-TODO>> SHOULD RETURN AN EXAMPLE OF EACH VARIENT
         vec![MoveType::DropPiece{ column: 0 }]
 	}
 }

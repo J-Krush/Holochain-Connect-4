@@ -1,11 +1,14 @@
-# Guide to implementing your game
+# Holochain-Connect-4
+Connect 4 game implemented on Holochain. 
+
+<!-- # Guide to implementing your game
 
 Hopefully you have completed the exercises in [the previous workbook](https://hackmd.io/aGR24Y91Te28dfdYn4WdVw?both) and have a pretty good idea of the state, moves and validation required for your game.
 
 The generic game framework makes it easy to develop new two player simple games on Holochain. All that is required is an implementation of:
 
 #### A `MoveType` enum
-This defines the types of moves that can be played in a game. e.g. for checkers we have 
+This defines the types of moves that can be played in a game. e.g. for checkers we have
 
 #### A `GameState` struct
 This defines that the state of game after a particular number of moves have occurred. This must implement the functions `initial`, `render` and `evolve`
@@ -39,14 +42,14 @@ We will revisit the `describe()` function later.
 
 The state of a game of tic-tac-toe is also pretty simple. It is just the location of the pieces places by each player. The state should also store the list of moves made so far.
 
-- **✍️Follow the steps to add a state object for a tic-tac-toe game** 
+- **✍️Follow the steps to add a state object for a tic-tac-toe game**
 
 
 ![](https://i.imgur.com/nuhNtIU.gif)
 
 Obviously the initial game board has no moves and no pieces.
 
-- **✍️Also implement the `initial() function`** 
+- **✍️Also implement the `initial() function`**
 
 ![](https://i.imgur.com/uOHV4my.gif)
 
@@ -64,7 +67,7 @@ Evolving the state in tic-tac-toe is easy. The new move must be added to the lis
 
 ## Validation
 
-Validation for moves is defined by implementing your own `is_valid` function on the `Move` struct. 
+Validation for moves is defined by implementing your own `is_valid` function on the `Move` struct.
 
 Before we do that we will add some helper functions to make the validation nice and readable.
 
@@ -133,5 +136,4 @@ The current implementation doesn't know when the game is over.
 
 #### 3. Add a `Resign` move
 
-The current implementation only has a single move type `Place`. Add another move type variant, `Resign`, which takes no parameters. On detecting a resign move the state evolution function should be updated to say the other player has won
-
+The current implementation only has a single move type `Place`. Add another move type variant, `Resign`, which takes no parameters. On detecting a resign move the state evolution function should be updated to say the other player has won -->

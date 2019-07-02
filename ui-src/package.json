@@ -1,0 +1,27 @@
+{
+  "name": "holochain-connect-4",
+  "version": "0.0.1",
+  "dependencies": {
+    "@holochain/hc-web-client": "^0.5.0",
+    "object-path-immutable": "^1.0.1",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "react-linkify": "^0.2.2",
+    "react-scripts": "latest",
+    "vuid": "^1.0.0"
+  },
+  "scripts": {
+    "start": "PORT=3002 react-scripts start",
+    "build": "rm -rf ../ui && react-scripts build && mv ./build ../ui",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "lint": "standard",
+    "clean": "rm -rf ../ui"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

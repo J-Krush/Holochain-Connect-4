@@ -81,6 +81,9 @@ impl GameState {
     pub fn render(&self) -> String {
         let mut disp = "\n".to_string();
 
+        // let board_string = self.board.to_string();
+        // disp.push_str(board_string);
+
         if let Some(last_move) = self.moves.last() {
             if last_move.author.to_string() == AGENT_ADDRESS.to_string() {
                 disp.push_str("It is your opponents turn \n");
@@ -90,16 +93,19 @@ impl GameState {
         } else {
             disp.push_str("Non-creator must make the first move \n");
         }
-        // disp.push('\n');
+        disp.push('\n');
+
         // disp.push_str("  x  0 1 2\ny\n");
-        // let board = board_sparse_to_dense(self);
-        // for y in 0..BOARD_SIZE {
+
+        // let board = self.board.clone();
+        //
+        // for y in 0..ROWS {
         //     disp.push_str(&format!("{}   |", y));
-        //     for x in 0..BOARD_SIZE {
+        //     for x in 0..COLUMNS {
         //         let c = match board[x][y] {
-        //             1 => PLAYER_1_MARK,
-        //             2 => PLAYER_2_MARK,
-        //             _ => EMPTY_SPACE,
+        //             1 => "🔵",
+        //             2 => "🔴",
+        //             0 => "O",
         //         };
         //         disp.push_str(&format!("{}|", c));
         //     }

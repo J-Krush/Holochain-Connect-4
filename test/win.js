@@ -2,7 +2,7 @@ const {results, lastResult, makeMove, createGame, renderState, getState} = requi
 
 module.exports = (scenario) => {
 
-  scenario("Can win", async (s, t, { alice, bob }) => {
+  scenario("Diagonal win", async (s, t, { alice, bob }) => {
     let game_address = await createGame(alice, bob);
 
 	  // agent 2 must go first
@@ -97,7 +97,6 @@ module.exports = (scenario) => {
     let state = await getState(alice, game_address)
     t.equal(state.Ok.player_1.winner, false, "Player 1 has not won");
     t.equal(state.Ok.player_2.winner, false, "Player 2 has not won");
-
 
 	  await renderState(alice, game_address)
 

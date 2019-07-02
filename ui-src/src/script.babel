@@ -1,0 +1,242 @@
+const { Component } = React;
+
+class Container extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      board: this.createBoard(),
+      playerOneTurn: true,
+      lastColClicked: null,
+      gameOver: false,
+      reset: false
+    };
+
+    this.handleClick = this.handleClick.bind(this);
+    this.updateBoard = this.updateBoard.bind(this);
+    this.checkScore = this.checkScore.bind(this);
+    this.arrows = this.arrows.bind(this);
+    this.handleReset = this.handleReset.bind(this);
+    this.resetState = this.resetState.bind(this);
+  }
+
+  createBoard() {
+    return Array(6).fill().map(arr => Array(7).fill(null));
+  }
+
+  updateBoard(prevState, colIndex) {
+    const board = prevState.board.slice();
+    const row = board.slice().reverse().filter(row => row[colIndex] === null)[0];
+    const rowIndex = board.indexOf(row);
+    board[rowIndex][colIndex] = prevState.playerOneTurn === true ? 'playerone' : 'playertwo';
+    return board;
+  }
+
+  checkScore(board, playerOneTurn) {
+    const player = playerOneTurn  ? 'playerone' : 'playertwo';
+
+    for (let c=0; c < (board[0].length - 3); c++) {
+      for (let r=0; r < board.length; r++) {
+        if (board[r][c] === player && board[r][c+1] === player && board[r][c+2] === player && board[r][c+3] === player) {
+          return `${player} wins across!!!`;
+        }
+      }
+    }
+
+    for (let c=0; c < board[0].length; c++) {
+      for (let r=0; r < (board.length - 3); r++) {
+        if (board[r][c] === player && board[r+1][c] === player && board[r+2][c] === player && board[r+3][c] === player) {
+          return `${player} wins vertically!!!`;
+        }
+      }
+    }  
+
+    for (let c=0; c < (board[0].length - 3); c++) {
+      for (let r=0; r < (board.length - 3); r++) { 
+        if (board[r][c] === player && board[r+1][c+1] === player && board[r+2][c+2] === player && board[r+3][c+3] === player) {
+          return `${player} wins diagonally!!!`;
+        }
+      }
+    }
+
+    for (let c=0; c < (board[0].length - 3); c++) {
+      for (let r=3; r < board.length; r++) {
+        if (board[r][c] === player && board[r-1][c+1] === player && board[r-2][c+2] === player && board[r-3][c+3] === player) {
+          return `${player} wins diagonally!!!`;
+        }
+      }
+    }  
+
+    return false;
+  }
+
+  handleClick(colIndex) {
+    this.setState(prevState => {
+      const board = this.updateBoard(prevState, colIndex);
+
+      const gameOver = this.checkScore(board, prevState.playerOneTurn);
+
+      return {
+        board,
+        playerOneTurn: !this.state.playerOneTurn,
+        lastColClicked: colIndex,
+        gameOver
+      }
+    });
+  }
+
+  arrows() {
+    return Array(7).fill().map((_, i) => {
+      const colFull = !this.state.board.map((row) => row[i]).some(item => item === null);
+
+      return <Arrow 
+              key={i} 
+              colIndex={i} 
+              handleClick={this.handleClick} 
+              gameOver={this.state.gameOver}
+              colFull={colFull}
+              reset={this.state.reset}
+             />
+    })
+  }
+
+  resetState() {
+    this.setState({
+      board: this.createBoard(),
+      playerOneTurn: true,
+      lastColClicked: null,
+      gameOver: false,
+      reset: false
+    });
+  }
+
+  handleReset() {
+    this.setState({reset: true});
+    setTimeout(this.resetState, 1400);
+  }
+
+  render() {
+    return (
+      <div>
+        <Header playerOneTurn={this.state.playerOneTurn} gameOver={this.state.gameOver} handleReset={this.handleReset}/>
+        <div className="container">
+          <Row style={{height: '20px', marginBottom: '40px', marginLeft: '20px'}}>
+            {this.arrows()}
+          </Row>
+          <Board {...this.state} handleReset={this.handleReset} />
+        </div>
+      </div>
+    );
+  }
+}
+
+const Header = ({playerOneTurn, gameOver, handleReset}) => {
+  return(
+    <div>
+      {!gameOver ? (
+        <div className="header">
+          <h1 className="title">Connect Four</h1>
+          <h1 className={playerOneTurn ? 'player-change' : 'hide-player'} >Player <span className="red">One</span> Go!</h1>
+          <h1 className={!playerOneTurn ? 'player-change' : 'hide-player'}>Player <span className="black">Two</span> Go!</h1>
+        </div>
+      ) : (
+        <h1 className="game-over">{gameOver.split('player').join('player ')}</h1>
+      )}
+      <Reset handleReset={handleReset} lever={false} />
+    </div>
+  );
+}
+
+const Board  = ({board, reset, handleReset}) => {
+  const rows = (_, i) => {
+    return (
+      <Row key={i}>
+        {rowOutput(spaces(i), 7)}
+      </Row>
+    );
+  }
+
+  const spaces = (rowIndex) => {
+    return (_, i) => {
+      return <Space key={i} player={board[rowIndex][i]} reset={reset} />;
+    };
+  }
+
+  const rowOutput = (row, num) => {
+    return Array(num).fill().map(row)
+  }
+
+  return (
+    <div className="board-holder">
+      <div className="board">
+        {rowOutput(rows, 6)}
+      </div>
+      <Reset handleReset={handleReset} lever={true} />
+    </div>
+  );
+}
+
+const Space = ({player, reset}) => {
+  const background = () => {
+    const style = {}
+    style.background = player === 'playerone' ? 'red' : 'black';
+
+    console.log(reset);
+    if (reset) {
+      style.animation = 'clearboard 1.5s linear';
+    }
+    return style;
+  }
+
+  return (
+    <div className="space">
+      { player !== null &&
+        <div className="chip player-drop" style={background()} ></div>
+      }
+    </div>
+  );
+}
+
+const Arrow = ({colIndex, handleClick, gameOver, colFull, reset}) => {
+  function sendKey() {
+    return handleClick(colIndex);
+  }
+
+  function columnFull() {
+    return colFull ? {visibility: 'hidden'} : {};
+  }
+
+  if (!gameOver && !reset) {
+    return <i className="fa fa-arrow-circle-down arrow" style={columnFull()} onClick={sendKey}></i>
+  } else {
+    return null;
+  }
+}
+
+const Reset = ({handleReset, lever}) => {
+  return (
+    <div className="reset-container">
+      {lever ? (
+        <div className="lever-container">
+          <div className="lever-text">
+            Reset <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          </div>    
+          <div className="lever" onClick={handleReset}></div>
+        </div>
+      ) : (
+        <button className="reset-button" onClick={handleReset}>
+          <i className="fa fa-refresh"></i>
+        </button>
+      )}
+    </div>
+  );
+}
+
+const Row = (props) => {
+  return (
+    <div className="row" style={props.style}>
+      {props.children}
+    </div>
+  );
+}
+
+ReactDOM.render(<Container />, document.getElementById('root'));

@@ -38,20 +38,62 @@ type = "memory"
 path = "tmp-storage"
 
 
-
-
 [[interfaces]]
-id = "http-interface1"
+id = "websocket_interface"
+admin = true
 [interfaces.driver]
-type = "http"
-port = 3001
+type = "websocket"
+port = 3401
 [[interfaces.instances]]
 id = "instance1"
 
 [[interfaces]]
-id = "http-interface2"
+id = "websocket_interface_2"
+admin = true
 [interfaces.driver]
-type = "http"
-port = 3002
+type = "websocket"
+port = 3402
 [[interfaces.instances]]
 id = "instance2"
+
+# [[interfaces]]
+# id = "http-interface1"
+# [interfaces.driver]
+# type = "http"
+# port = 3001
+# [[interfaces.instances]]
+# id = "instance1"
+
+# [[interfaces]]
+# id = "http-interface2"
+# [interfaces.driver]
+# type = "http"
+# port = 3002
+# [[interfaces.instances]]
+# id = "instance2"
+
+
+# -----------  UI  -----------
+
+[[ui_bundles]]
+id = "main1"
+root_dir = "./ui"
+hash = "Qm000"
+
+[[ui_interfaces]]
+id = "ui-interface-1"
+bundle = "main1"
+port = 3001
+dna_interface = "websocket_interface"
+
+
+[[ui_bundles]]
+id = "main2"
+root_dir = "./ui"
+hash = "Qm001"
+
+[[ui_interfaces]]
+id = "ui-interface-2"
+bundle = "main2"
+port = 3002
+dna_interface = "websocket_interface_2"

@@ -115,6 +115,18 @@
   font-size: 1.2em;
 }
 
+.subtitle {
+  font-size: 0.1em;
+}
+
+.input {
+  width: 500px;
+}
+
+.start-game-button {
+  font-size: 1em;
+}
+
 .player-change {
   font-size: 1em;
   color: #DFC12A;

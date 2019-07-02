@@ -97,20 +97,20 @@ impl GameState {
 
         // disp.push_str("  x  0 1 2\ny\n");
 
-        // let board = self.board.clone();
-        //
-        // for y in 0..ROWS {
-        //     disp.push_str(&format!("{}   |", y));
-        //     for x in 0..COLUMNS {
-        //         let c = match board[x][y] {
-        //             1 => "🔵",
-        //             2 => "🔴",
-        //             0 => "O",
-        //         };
-        //         disp.push_str(&format!("{}|", c));
-        //     }
-        //     disp.push('\n');
-        // }
+        let board = self.board.clone();
+
+        for y in (0..ROWS).rev() {
+            disp.push_str(&format!("{}   |", y));
+            for x in 0..COLUMNS {
+                let c = match board[x][y] {
+                    1 => "🔵",
+                    2 => "🔴",
+                    _ => "⚪️",
+                };
+                disp.push_str(&format!("{}|", c));
+            }
+            disp.push('\n');
+        }
 
         if self.player_1.resigned {
             disp.push_str(&format!("Game over: Player 1 has resigned!\n"));

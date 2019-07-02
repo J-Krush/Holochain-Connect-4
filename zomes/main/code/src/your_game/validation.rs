@@ -24,6 +24,7 @@ use super::moves::MoveType;
 impl Move {
     pub fn is_valid(&self, game: Game, game_state: GameState) -> Result<(), String> {
         is_players_turn(self.author.clone(), &game, &game_state)?;
+        is_game_over(&game_state)?;
 
         match self.move_type {
             MoveType::DropPiece{column} => {
@@ -56,4 +57,16 @@ fn is_players_turn(player: Address, game: &Game, game_state: &GameState) -> Resu
             }
         }
     }
+}
+
+fn is_game_over(game_state: &GameState) -> Result<(), String> {
+    let player_1 = &game_state.player_1;
+    let player_2 = &game_state.player_2;
+
+    if player_1.winner == true || player_2.winner == true {
+        Err("The game is over!".into())
+    } else {
+        Ok(())
+    }
+
 }

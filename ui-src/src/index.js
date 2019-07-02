@@ -8,7 +8,10 @@ class Container extends Component {
     super(props);
     this.state = {
       board: this.createBoard(),
-      playerOneTurn: true,
+      holochainConnection: connect(), // use when letting the conductor auto-select. Allows for multiple agents
+      connected: false,
+      user: {},
+      playerOneTurn: false,
       lastColClicked: null,
       gameOver: false,
       reset: false };
@@ -117,6 +120,35 @@ class Container extends Component {
     setTimeout(this.resetState, 1400);
   }
 
+  // ******************** HOLOCHAIN STUFF ******************** //
+
+  // makeMove: ({ text, column }) => {
+  //       const message = {
+  //         // game: Address,
+  //       	// move_type: MoveType,
+  //       	// timestamp: u32,
+  //         game: Address,
+  //       	move_type: MoveType,
+  //       	timestamp: Math.floor(Date.now() / 1000),
+  //       }
+  //       this.makeHolochainCall('connect-4/main/make_move', {
+  //         stream_address: roomId,
+  //         message
+  //       }, (result) => {
+  //         console.log('move made', result)
+  //       })
+  //     },
+
+  makeHolochainCall (callString, params, callback) {
+    const [instanceId, zome, func] = callString.split('/')
+    this.state.holochainConnection.then(({ callZome }) => {
+      callZome(instanceId, zome, func)(params).then((result) => callback(JSON.parse(result)))
+    })
+  }
+
+
+  // ****************** END OF HOLOCHAIN STUFF ****************** //
+
   render() {
     return (
       React.createElement("div", null,
@@ -137,7 +169,7 @@ const Header = ({ playerOneTurn, gameOver, handleReset }) => {
     React.createElement("div", null,
     !gameOver ?
     React.createElement("div", { className: "header" },
-    React.createElement("h1", { className: "title" }, "Connect Four"),
+    React.createElement("h1", { className: "title" }, "HC Connect 4"),
     React.createElement("h1", { className: playerOneTurn ? 'player-change' : 'hide-player' }, "Player ", React.createElement("span", { className: "red" }, "One"), " Go!"),
     React.createElement("h1", { className: !playerOneTurn ? 'player-change' : 'hide-player' }, "Player ", React.createElement("span", { className: "black" }, "Two"), " Go!")) :
 
